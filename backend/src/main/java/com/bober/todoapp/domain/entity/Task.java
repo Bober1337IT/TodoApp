@@ -1,6 +1,7 @@
 package com.bober.todoapp.domain.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -8,11 +9,18 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "tasks")
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString
 public class Task {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false)
+    @EqualsAndHashCode.Include
     private UUID id;
 
     @Column(name = "title", nullable = false)
