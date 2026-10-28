@@ -30,7 +30,7 @@ public class Task {
     private String description;
 
     @Column(name = "due_date")
-    private LocalDate dueDAte;
+    private LocalDate dueDate;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
