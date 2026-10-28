@@ -1,0 +1,28 @@
+### Create task — full body
+POST {{host}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "title": "Kup mleko",
+  "description": "2 litry",
+  "dueDate": "2026-10-29",
+  "priority": "MEDIUM"
+}
+
+### Create task — minimal (only required fields)
+POST {{host}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "title": "Zrób zadanie",
+  "priority": "HIGH"
+}
+
+### Create task — validation error (empty title)
+POST {{host}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "title": "",
+  "priority": "LOW"
+}
