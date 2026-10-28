@@ -1,0 +1,38 @@
+package com.bober.todoapp.controller;
+
+import com.bober.todoapp.domain.CreateTaskRequest;
+import com.bober.todoapp.domain.dto.CreateTaskRequestDTO;
+import com.bober.todoapp.domain.dto.TaskDTO;
+import com.bober.todoapp.domain.entity.Task;
+import com.bober.todoapp.domain.mapper.TaskMapper;
+import com.bober.todoapp.service.TaskService;
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@AllArgsConstructor
+@RestController
+@RequestMapping(path = "/api/v1/tasks")
+public class TaskController {
+
+    private final TaskService taskService;
+    private final TaskMapper taskMapper;
+
+    @PostMapping
+    public ResponseEntity<TaskDTO> createTask(
+            @Valid
+            @RequestBody
+            CreateTaskRequestDTO createTaskRequestDTO
+    ) {
+        CreateTaskRequest createTaskRequest = taskMapper.fromDTO(createTaskRequestDTO);
+        Task task = taskService.createTask(createTaskRequest);
+        TaskDTO createdTaskDTO = taskMapper.toDTO(task);
+        return new ResponseEntity<>(createdTaskDTO, HttpStatus.CREATED);
+    }
+
+}
