@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class TaskServiceImpl implements TaskService {
@@ -41,5 +42,10 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public List<Task> listTasks(){
         return taskRepository.findAll(Sort.by(Sort.Direction.ASC, "created"));
+    }
+
+    @Override
+    public void deleteTaskById(UUID taskId) {
+        taskRepository.deleteById(taskId);
     }
 }

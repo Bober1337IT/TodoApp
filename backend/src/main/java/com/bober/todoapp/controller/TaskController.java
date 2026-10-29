@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @AllArgsConstructor
 @RestController
@@ -39,5 +40,14 @@ public class TaskController {
         List<Task> tasks = taskService.listTasks();
         List<TaskDTO> tasksDTO = tasks.stream().map(taskMapper::toDTO).toList();
         return ResponseEntity.ok(tasksDTO);
+    }
+
+    @DeleteMapping(path = "/{taskId}")
+    public ResponseEntity<Void> deleteTaskById(
+            @PathVariable
+            UUID taskId
+    ){
+        taskService.deleteTaskById(taskId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
