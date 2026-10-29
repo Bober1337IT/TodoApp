@@ -16,3 +16,9 @@ export async function createTask(input: CreateTaskInput): Promise<Task> {
   })
   return mapTaskDtoToTask(data as Parameters<typeof mapTaskDtoToTask>[0])
 }
+
+export async function deleteTask(id: string): Promise<void> {
+  await http<void>(`${TASKS_PATH}/${id}`, {
+    method: 'DELETE',
+  })
+}

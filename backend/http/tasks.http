@@ -26,3 +26,9 @@ Content-Type: application/json
   "title": "",
   "priority": "LOW"
 }
+
+### List tasks
+GET {{host}}/api/v1/tasks
+
+### Delete task
+DELETE {{host}}/api/v1/tasks/{{taskId}}
