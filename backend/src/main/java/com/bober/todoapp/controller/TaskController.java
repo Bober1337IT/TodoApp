@@ -1,8 +1,10 @@
 package com.bober.todoapp.controller;
 
 import com.bober.todoapp.domain.CreateTaskRequest;
+import com.bober.todoapp.domain.UpdatedTaskRequest;
 import com.bober.todoapp.domain.dto.CreateTaskRequestDTO;
 import com.bober.todoapp.domain.dto.TaskDTO;
+import com.bober.todoapp.domain.dto.UpdatedTaskRequestDTO;
 import com.bober.todoapp.domain.entity.Task;
 import com.bober.todoapp.domain.mapper.TaskMapper;
 import com.bober.todoapp.service.TaskService;
@@ -34,7 +36,6 @@ public class TaskController {
         TaskDTO createdTaskDTO = taskMapper.toDTO(task);
         return new ResponseEntity<>(createdTaskDTO, HttpStatus.CREATED);
     }
-
     @GetMapping
     public ResponseEntity<List<TaskDTO>> listTasks(){
         List<Task> tasks = taskService.listTasks();
@@ -49,5 +50,19 @@ public class TaskController {
     ){
         taskService.deleteTaskById(taskId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PutMapping(path = "{taskId}")
+    public ResponseEntity<TaskDTO> updateTaskById(
+            @PathVariable
+            UUID taskId,
+            @Valid
+            @RequestBody
+            UpdatedTaskRequestDTO updatedTaskRequestDTO
+    ){
+        UpdatedTaskRequest updatedTaskRequest = taskMapper.fromDTO(updatedTaskRequestDTO);
+        Task task = taskService.updateTaskById(taskId, updatedTaskRequest);
+        TaskDTO taskDTO = taskMapper.toDTO(task);
+        return ResponseEntity.ok(taskDTO);
     }
 }
