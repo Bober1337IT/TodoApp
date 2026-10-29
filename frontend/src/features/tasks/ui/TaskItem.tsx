@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { Task } from '@/entities/task/model/types'
 import { useDeleteTaskMutation } from '@/features/tasks/api/useDeleteTaskMutation'
-import { useUpdateTaskMutation } from '@/features/tasks/api/useUpdateTaskMutation'
+import { useUpdateTaskStatusMutation } from '@/features/tasks/api/useUpdateTaskStatusMutation'
 import { TaskEditForm } from '@/features/tasks/ui/TaskEditForm'
 import { toErrorMessage } from '@/shared/api/errors'
 import { Button } from '@/shared/ui/Button'
@@ -13,19 +13,15 @@ type TaskItemProps = {
 export function TaskItem({ task }: TaskItemProps) {
   const [isEditing, setIsEditing] = useState(false)
   const deleteTask = useDeleteTaskMutation()
-  const updateTask = useUpdateTaskMutation()
+  const updateTaskStatus = useUpdateTaskStatusMutation()
 
   const isComplete = task.status === 'COMPLETE'
-  const isBusy = isEditing || deleteTask.isPending || updateTask.isPending
+  const isBusy = isEditing || deleteTask.isPending || updateTaskStatus.isPending
 
   const toggleStatus = () => {
-    void updateTask.mutateAsync({
+    void updateTaskStatus.mutateAsync({
       id: task.id,
       input: {
-        title: task.title,
-        description: task.description,
-        dueDate: task.dueDate,
-        priority: task.priority,
         status: isComplete ? 'OPEN' : 'COMPLETE',
       },
     })
@@ -73,9 +69,9 @@ export function TaskItem({ task }: TaskItemProps) {
               {toErrorMessage(deleteTask.error, 'Failed to delete task')}
             </p>
           ) : null}
-          {updateTask.isError ? (
+          {updateTaskStatus.isError ? (
             <p className="mt-2 text-xs text-red-700">
-              {toErrorMessage(updateTask.error, 'Failed to update task status')}
+              {toErrorMessage(updateTaskStatus.error, 'Failed to update task status')}
             </p>
           ) : null}
         </div>

@@ -44,3 +44,11 @@ Content-Type: application/json
   "priority": "HIGH",
   "status": "OPEN"
 }
+
+### Update task status
+PATCH {{host}}/api/v1/tasks/{{taskId}}/status
+Content-Type: application/json
+
+{
+  "status": "COMPLETE"
+}

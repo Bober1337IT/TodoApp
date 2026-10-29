@@ -3,7 +3,7 @@ import { useTasksQuery } from '@/features/tasks/api/useTasksQuery'
 import { TaskItem } from '@/features/tasks/ui/TaskItem'
 
 export function TaskList() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useTasksQuery()
+  const { data, isLoading, isError, error, refetch } = useTasksQuery()
 
   if (isLoading) {
     return <p className="text-sm text-stone-600">Loading tasks…</p>
@@ -31,13 +31,10 @@ export function TaskList() {
   }
 
   return (
-    <div className="space-y-2">
-      {isFetching ? <p className="text-xs text-stone-400">Refreshing…</p> : null}
-      <ul className="space-y-2">
-        {data.map((task) => (
-          <TaskItem key={task.id} task={task} />
-        ))}
-      </ul>
-    </div>
+    <ul className="space-y-2">
+      {data.map((task) => (
+        <TaskItem key={task.id} task={task} />
+      ))}
+    </ul>
   )
 }

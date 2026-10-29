@@ -27,3 +27,7 @@ export type UpdateTaskInput = {
   priority: TaskPriority
   status: TaskStatus
 }
+
+export type UpdateTaskStatusInput = {
+  status: TaskStatus
+}
