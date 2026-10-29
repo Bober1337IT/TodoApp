@@ -10,7 +10,7 @@ import org.hibernate.validator.constraints.Length;
 
 import java.time.LocalDate;
 
-public record UpdatedTaskRequestDTO(
+public record UpdateTaskRequestDTO(
         @NotBlank(message = ERROR_MESSAGE_TITLE_LENGTH)
         @Length(max = 255, message = ERROR_MESSAGE_TITLE_LENGTH)
         String title,

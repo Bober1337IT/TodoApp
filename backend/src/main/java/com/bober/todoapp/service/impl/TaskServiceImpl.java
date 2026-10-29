@@ -1,7 +1,8 @@
 package com.bober.todoapp.service.impl;
 
 import com.bober.todoapp.domain.CreateTaskRequest;
-import com.bober.todoapp.domain.UpdatedTaskRequest;
+import com.bober.todoapp.domain.UpdateTaskRequest;
+import com.bober.todoapp.domain.UpdateTaskStatusRequest;
 import com.bober.todoapp.domain.entity.Task;
 import com.bober.todoapp.domain.entity.TaskStatus;
 import com.bober.todoapp.repository.TaskRepository;
@@ -51,7 +52,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Task updateTaskById(UUID taskId, UpdatedTaskRequest request) {
+    public Task updateTaskById(UUID taskId, UpdateTaskRequest request) {
 
         Task task = taskRepository.findById(taskId).orElseThrow();
 
@@ -60,6 +61,18 @@ public class TaskServiceImpl implements TaskService {
         task.setDueDate(request.dueDate());
         task.setPriority(request.priority());
         task.setStatus(request.status());
+        task.setUpdated(Instant.now());
+
+        return taskRepository.save(task);
+    }
+
+    @Override
+    public Task updateTaskStatusById(UUID taskId, UpdateTaskStatusRequest request) {
+
+        Task task = taskRepository.findById(taskId).orElseThrow();
+
+        task.setStatus(request.status());
+        task.setUpdated(Instant.now());
 
         return taskRepository.save(task);
     }

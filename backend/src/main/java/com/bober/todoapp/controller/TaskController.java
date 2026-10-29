@@ -1,10 +1,12 @@
 package com.bober.todoapp.controller;
 
 import com.bober.todoapp.domain.CreateTaskRequest;
-import com.bober.todoapp.domain.UpdatedTaskRequest;
+import com.bober.todoapp.domain.UpdateTaskRequest;
+import com.bober.todoapp.domain.UpdateTaskStatusRequest;
 import com.bober.todoapp.domain.dto.CreateTaskRequestDTO;
 import com.bober.todoapp.domain.dto.TaskDTO;
-import com.bober.todoapp.domain.dto.UpdatedTaskRequestDTO;
+import com.bober.todoapp.domain.dto.UpdateTaskRequestDTO;
+import com.bober.todoapp.domain.dto.UpdateTaskStatusRequestDTO;
 import com.bober.todoapp.domain.entity.Task;
 import com.bober.todoapp.domain.mapper.TaskMapper;
 import com.bober.todoapp.service.TaskService;
@@ -58,10 +60,24 @@ public class TaskController {
             UUID taskId,
             @Valid
             @RequestBody
-            UpdatedTaskRequestDTO updatedTaskRequestDTO
+            UpdateTaskRequestDTO updateTaskRequestDTO
     ){
-        UpdatedTaskRequest updatedTaskRequest = taskMapper.fromDTO(updatedTaskRequestDTO);
-        Task task = taskService.updateTaskById(taskId, updatedTaskRequest);
+        UpdateTaskRequest updateTaskRequest = taskMapper.fromDTO(updateTaskRequestDTO);
+        Task task = taskService.updateTaskById(taskId, updateTaskRequest);
+        TaskDTO taskDTO = taskMapper.toDTO(task);
+        return ResponseEntity.ok(taskDTO);
+    }
+
+    @PatchMapping(path = "/{taskId}/status")
+    public ResponseEntity<TaskDTO> updateTaskStatusById(
+            @PathVariable
+            UUID taskId,
+            @Valid
+            @RequestBody
+            UpdateTaskStatusRequestDTO updateTaskStatusRequestDTO
+    ){
+        UpdateTaskStatusRequest updateTaskStatusRequest = taskMapper.fromDTO(updateTaskStatusRequestDTO);
+        Task task = taskService.updateTaskStatusById(taskId, updateTaskStatusRequest);
         TaskDTO taskDTO = taskMapper.toDTO(task);
         return ResponseEntity.ok(taskDTO);
     }

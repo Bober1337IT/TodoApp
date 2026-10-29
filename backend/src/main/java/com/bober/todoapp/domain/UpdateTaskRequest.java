@@ -5,7 +5,7 @@ import com.bober.todoapp.domain.entity.TaskStatus;
 
 import java.time.LocalDate;
 
-public record UpdatedTaskRequest(
+public record UpdateTaskRequest(
         String title,
         String description,
         LocalDate dueDate,
