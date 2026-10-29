@@ -44,7 +44,7 @@ export function TaskEditForm({ task, onCancel, onSaved }: TaskEditFormProps) {
   })
 
   return (
-    <form onSubmit={onSubmit} className="mt-3 space-y-3 border-t border-stone-200 pt-3">
+    <form onSubmit={onSubmit} className="space-y-3 rounded border border-stone-200 bg-white p-4">
       <div>
         <label htmlFor={`edit-title-${task.id}`} className="mb-1 block text-sm font-medium text-stone-700">
           Title

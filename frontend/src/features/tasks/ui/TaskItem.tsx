@@ -1,17 +1,16 @@
-import { useState } from 'react'
 import type { Task } from '@/entities/task/model/types'
 import { useDeleteTaskMutation } from '@/features/tasks/api/useDeleteTaskMutation'
 import { useUpdateTaskStatusMutation } from '@/features/tasks/api/useUpdateTaskStatusMutation'
-import { TaskEditForm } from '@/features/tasks/ui/TaskEditForm'
 import { toErrorMessage } from '@/shared/api/errors'
 import { Button } from '@/shared/ui/Button'
 
 type TaskItemProps = {
   task: Task
+  isEditing: boolean
+  onEdit: () => void
 }
 
-export function TaskItem({ task }: TaskItemProps) {
-  const [isEditing, setIsEditing] = useState(false)
+export function TaskItem({ task, isEditing, onEdit }: TaskItemProps) {
   const deleteTask = useDeleteTaskMutation()
   const updateTaskStatus = useUpdateTaskStatusMutation()
 
@@ -28,7 +27,11 @@ export function TaskItem({ task }: TaskItemProps) {
   }
 
   return (
-    <li className="rounded border border-stone-200 bg-white px-4 py-3">
+    <li
+      className={`rounded border bg-white px-4 py-3 ${
+        isEditing ? 'border-stone-500 ring-1 ring-stone-400' : 'border-stone-200'
+      }`}
+    >
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-3">
@@ -77,15 +80,8 @@ export function TaskItem({ task }: TaskItemProps) {
         </div>
 
         <div className="flex shrink-0 flex-wrap gap-2">
-          <Button
-            type="button"
-            variant="secondary"
-            disabled={isBusy}
-            onClick={() => {
-              setIsEditing(true)
-            }}
-          >
-            Edit
+          <Button type="button" variant="secondary" disabled={isBusy} onClick={onEdit}>
+            {isEditing ? 'Editing…' : 'Edit'}
           </Button>
           <Button
             type="button"
@@ -99,18 +95,6 @@ export function TaskItem({ task }: TaskItemProps) {
           </Button>
         </div>
       </div>
-
-      {isEditing ? (
-        <TaskEditForm
-          task={task}
-          onCancel={() => {
-            setIsEditing(false)
-          }}
-          onSaved={() => {
-            setIsEditing(false)
-          }}
-        />
-      ) : null}
     </li>
   )
 }

@@ -1,8 +1,14 @@
+import type { Task } from '@/entities/task/model/types'
 import { toErrorMessage } from '@/shared/api/errors'
 import { useTasksQuery } from '@/features/tasks/api/useTasksQuery'
 import { TaskItem } from '@/features/tasks/ui/TaskItem'
 
-export function TaskList() {
+type TaskListProps = {
+  editingTaskId: string | null
+  onEditTask: (task: Task) => void
+}
+
+export function TaskList({ editingTaskId, onEditTask }: TaskListProps) {
   const { data, isLoading, isError, error, refetch } = useTasksQuery()
 
   if (isLoading) {
@@ -33,7 +39,14 @@ export function TaskList() {
   return (
     <ul className="space-y-2">
       {data.map((task) => (
-        <TaskItem key={task.id} task={task} />
+        <TaskItem
+          key={task.id}
+          task={task}
+          isEditing={editingTaskId === task.id}
+          onEdit={() => {
+            onEditTask(task)
+          }}
+        />
       ))}
     </ul>
   )
