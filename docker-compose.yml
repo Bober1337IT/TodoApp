@@ -1,4 +1,15 @@
 services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: todoapp
+      POSTGRES_USER: todo
+      POSTGRES_PASSWORD: todo
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
   backend:
     build: ./backend
     ports:
@@ -10,3 +21,6 @@ services:
       - "5173:80"
     depends_on:
       - backend
+
+volumes:
+  pgdata:
