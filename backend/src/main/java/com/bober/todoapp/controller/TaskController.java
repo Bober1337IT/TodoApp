@@ -52,7 +52,7 @@ public class TaskController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PutMapping(path = "{taskId}")
+    @PutMapping(path = "/{taskId}")
     public ResponseEntity<TaskDTO> updateTaskById(
             @PathVariable
             UUID taskId,

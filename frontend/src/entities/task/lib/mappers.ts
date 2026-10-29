@@ -1,6 +1,12 @@
-import type { CreateTaskInput, Task, TaskPriority, TaskStatus } from '@/entities/task/model/types'
+import type {
+  CreateTaskInput,
+  Task,
+  TaskPriority,
+  TaskStatus,
+  UpdateTaskInput,
+} from '@/entities/task/model/types'
 import { TASK_PRIORITIES, TASK_STATUSES } from '@/entities/task/model/types'
-import type { CreateTaskFormValues } from '@/entities/task/lib/schemas'
+import type { CreateTaskFormValues, UpdateTaskFormValues } from '@/entities/task/lib/schemas'
 
 type TaskDto = {
   id: string
@@ -48,5 +54,25 @@ export function mapFormValuesToCreateInput(values: CreateTaskFormValues): Create
     description: values.description?.trim() ? values.description.trim() : null,
     dueDate: values.dueDate ? values.dueDate : null,
     priority: values.priority,
+  }
+}
+
+export function mapFormValuesToUpdateInput(values: UpdateTaskFormValues): UpdateTaskInput {
+  return {
+    title: values.title.trim(),
+    description: values.description?.trim() ? values.description.trim() : null,
+    dueDate: values.dueDate ? values.dueDate : null,
+    priority: values.priority,
+    status: values.status,
+  }
+}
+
+export function mapTaskToUpdateFormValues(task: Task): UpdateTaskFormValues {
+  return {
+    title: task.title,
+    description: task.description ?? '',
+    dueDate: task.dueDate ?? '',
+    priority: task.priority,
+    status: task.status,
   }
 }

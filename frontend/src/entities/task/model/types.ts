@@ -19,3 +19,11 @@ export type CreateTaskInput = {
   dueDate?: string | null
   priority: TaskPriority
 }
+
+export type UpdateTaskInput = {
+  title: string
+  description?: string | null
+  dueDate?: string | null
+  priority: TaskPriority
+  status: TaskStatus
+}
