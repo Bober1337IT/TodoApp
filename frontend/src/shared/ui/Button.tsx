@@ -1,13 +1,32 @@
 import type { ButtonHTMLAttributes } from 'react'
 
-type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement>
+type ButtonVariant = 'primary' | 'secondary' | 'danger'
 
-export function Button({ className = '', disabled, ...props }: ButtonProps) {
+type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+  variant?: ButtonVariant
+}
+
+const variantClassName: Record<ButtonVariant, string> = {
+  primary:
+    'border-stone-700 bg-stone-800 text-white hover:bg-stone-700',
+  secondary:
+    'border-stone-400 bg-stone-100 text-stone-900 hover:bg-stone-200',
+  danger:
+    'border-red-800 bg-red-700 text-white hover:bg-red-800',
+}
+
+export function Button({
+  className = '',
+  disabled,
+  variant = 'primary',
+  type = 'button',
+  ...props
+}: ButtonProps) {
   return (
     <button
-      type="button"
+      type={type}
       disabled={disabled}
-      className={`rounded border border-stone-700 bg-stone-800 px-3 py-2 text-sm font-medium text-white hover:bg-stone-700 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
+      className={`rounded border px-3 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50 ${variantClassName[variant]} ${className}`}
       {...props}
     />
   )

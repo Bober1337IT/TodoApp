@@ -35,7 +35,8 @@ export function TaskItem({ task }: TaskItemProps) {
 
         <Button
           type="button"
-          className="border-stone-300 bg-white text-stone-800 hover:bg-stone-100"
+          variant="danger"
+          className="shrink-0"
           disabled={deleteTask.isPending}
           onClick={() => {
             void deleteTask.mutateAsync(task.id)
