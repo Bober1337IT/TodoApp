@@ -5,6 +5,7 @@ import com.bober.todoapp.domain.UpdateTaskRequest;
 import com.bober.todoapp.domain.UpdateTaskStatusRequest;
 import com.bober.todoapp.domain.entity.Task;
 import com.bober.todoapp.domain.entity.TaskStatus;
+import com.bober.todoapp.exception.TaskNotFoundException;
 import com.bober.todoapp.repository.TaskRepository;
 import com.bober.todoapp.service.TaskService;
 import org.springframework.data.domain.Sort;
@@ -54,7 +55,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Task updateTaskById(UUID taskId, UpdateTaskRequest request) {
 
-        Task task = taskRepository.findById(taskId).orElseThrow();
+        Task task = taskRepository.findById(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
 
         task.setTitle(request.title());
         task.setDescription(request.description());
