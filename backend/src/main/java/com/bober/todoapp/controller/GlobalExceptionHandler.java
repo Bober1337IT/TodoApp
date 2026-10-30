@@ -1,6 +1,7 @@
 package com.bober.todoapp.controller;
 
 import com.bober.todoapp.domain.dto.ErrorDTO;
+import com.bober.todoapp.exception.TaskNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -19,5 +20,10 @@ public class GlobalExceptionHandler {
 
         ErrorDTO errorDTO = new ErrorDTO(errorMessage);
         return new ResponseEntity<>(errorDTO, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(TaskNotFoundException.class)
+    public ResponseEntity<ErrorDTO> handleTaskNotFoundException(TaskNotFoundException ex){
+        return new ResponseEntity<>(new ErrorDTO(ex.getMessage()), HttpStatus.NOT_FOUND);
     }
 }

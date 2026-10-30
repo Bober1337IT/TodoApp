@@ -10,7 +10,7 @@ public class TaskNotFoundException extends RuntimeException {
     private final UUID taskID;
 
     public TaskNotFoundException(UUID taskID) {
-        super(String.format("Task with ID '%s' does not exists", taskID));
+        super(String.format("Task with ID '%s' does not exist", taskID));
         this.taskID = taskID;
     }
 }

@@ -70,7 +70,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Task updateTaskStatusById(UUID taskId, UpdateTaskStatusRequest request) {
 
-        Task task = taskRepository.findById(taskId).orElseThrow();
+        Task task = taskRepository.findById(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
 
         task.setStatus(request.status());
         task.setUpdated(Instant.now());
