@@ -28,7 +28,9 @@ public class TaskServiceImpl implements TaskService {
     public Task createTask(CreateTaskRequest request) {
         Instant now = Instant.now();
 
+        // user is set later when task endpoints are protected by JWT
         Task task = new Task(
+                null,
                 null,
                 request.title(),
                 request.description(),

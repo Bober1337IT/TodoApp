@@ -1,6 +1,8 @@
 package com.bober.todoapp.controller;
 
 import com.bober.todoapp.domain.dto.common.ErrorDTO;
+import com.bober.todoapp.exception.EmailAlreadyExistsException;
+import com.bober.todoapp.exception.InvalidCredentialsException;
 import com.bober.todoapp.exception.TaskNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,5 +27,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(TaskNotFoundException.class)
     public ResponseEntity<ErrorDTO> handleTaskNotFoundException(TaskNotFoundException ex){
         return new ResponseEntity<>(new ErrorDTO(ex.getMessage()), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<ErrorDTO> handleEmailAlreadyExists(EmailAlreadyExistsException ex) {
+        return new ResponseEntity<>(new ErrorDTO(ex.getMessage()), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ErrorDTO> handleInvalidCredentials(InvalidCredentialsException ex) {
+        return new ResponseEntity<>(new ErrorDTO(ex.getMessage()), HttpStatus.UNAUTHORIZED);
     }
 }
