@@ -14,7 +14,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@ToString
+@ToString(onlyExplicitlyIncluded = true)
 public class Task {
 
     @Id
@@ -22,6 +22,11 @@ public class Task {
     @Column(name = "id", updatable = false, nullable = false)
     @EqualsAndHashCode.Include
     private UUID id;
+
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    @ToString.Exclude
+    private User owner;
 
     @Column(name = "title", nullable = false)
     private String title;
