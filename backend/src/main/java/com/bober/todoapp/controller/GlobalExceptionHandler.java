@@ -1,6 +1,6 @@
 package com.bober.todoapp.controller;
 
-import com.bober.todoapp.domain.dto.ErrorDTO;
+import com.bober.todoapp.domain.dto.common.ErrorDTO;
 import com.bober.todoapp.exception.TaskNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

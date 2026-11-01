@@ -1,4 +1,4 @@
-package com.bober.todoapp.domain.dto;
+package com.bober.todoapp.domain.dto.user;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

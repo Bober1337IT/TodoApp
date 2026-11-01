@@ -1,4 +1,4 @@
-package com.bober.todoapp.domain.dto;
+package com.bober.todoapp.domain.dto.task;
 
 import com.bober.todoapp.domain.entity.TaskPriority;
 import com.bober.todoapp.domain.entity.TaskStatus;
