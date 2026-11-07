@@ -1,17 +1,27 @@
 import { useState } from 'react'
 import type { Task } from '@/entities/task/model/types'
+import { useAuth } from '@/features/auth/model/AuthContext'
 import { TaskEditForm } from '@/features/tasks/ui/TaskEditForm'
 import { TaskForm } from '@/features/tasks/ui/TaskForm'
 import { TaskList } from '@/features/tasks/ui/TaskList'
+import { Button } from '@/shared/ui/Button'
 
 export function TasksPage() {
+  const { session, logout } = useAuth()
   const [editingTask, setEditingTask] = useState<Task | null>(null)
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-8">
-      <header className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight text-stone-900">Tasks</h1>
-        <p className="mt-1 text-sm text-stone-600">Create and review your tasks.</p>
+      <header className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-stone-900">Tasks</h1>
+          <p className="mt-1 text-sm text-stone-600">
+            Signed in as <span className="font-medium text-stone-800">{session?.email}</span>
+          </p>
+        </div>
+        <Button type="button" variant="secondary" onClick={logout}>
+          Sign out
+        </Button>
       </header>
 
       <section className="mb-8" aria-labelledby="task-form-heading">
