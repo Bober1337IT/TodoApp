@@ -33,6 +33,6 @@ public class RateLimitConfig {
     }
 
     private static Bandwidth defaultBandwidth() {
-        return Bandwidth.classic(20, Refill.greedy(20, Duration.ofMinutes(1)));
+        return Bandwidth.classic(5, Refill.greedy(5, Duration.ofMinutes(1)));
     }
 }
