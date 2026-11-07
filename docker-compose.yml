@@ -30,5 +30,15 @@ services:
     depends_on:
       - backend
 
+  prometheus:
+    image: prom/prometheus:v3.2.1
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      - backend
+
 volumes:
   pgdata:
+  grafana_data:

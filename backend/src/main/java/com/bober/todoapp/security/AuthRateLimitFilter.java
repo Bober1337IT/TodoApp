@@ -1,6 +1,8 @@
 package com.bober.todoapp.security;
 
 import com.bober.todoapp.service.RateLimitingService;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,9 +23,11 @@ public class AuthRateLimitFilter extends OncePerRequestFilter {
             "{\"error\":\"Too many requests. Try again later.\"}".getBytes(StandardCharsets.UTF_8);
 
     private final RateLimitingService rateLimitingService;
+    private final MeterRegistry meterRegistry;
 
-    public AuthRateLimitFilter(RateLimitingService rateLimitingService) {
+    public AuthRateLimitFilter(RateLimitingService rateLimitingService, MeterRegistry meterRegistry) {
         this.rateLimitingService = rateLimitingService;
+        this.meterRegistry = meterRegistry;
     }
 
     @Override
@@ -39,9 +43,16 @@ public class AuthRateLimitFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
         String clientIp = resolveClientIp(request);
-        String key = request.getRequestURI() + ":" + clientIp;
+        String path = request.getRequestURI();
+        String key = path + ":" + clientIp;
 
         if (!rateLimitingService.isAllowed(key)) {
+            Counter.builder("auth.rate_limit.rejected")
+                    .description("Auth requests rejected by rate limiting")
+                    .tag("path", path)
+                    .register(meterRegistry)
+                    .increment();
+
             response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setHeader("Retry-After", "60");
