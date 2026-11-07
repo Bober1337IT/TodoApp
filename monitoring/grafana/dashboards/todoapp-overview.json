@@ -36,14 +36,30 @@
       },
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
       "id": 2,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
       "targets": [
         {
-          "expr": "sum(rate(http_server_requests_seconds_count{application=\"todoapp\",status=~\"5..\"}[1m])) by (status)",
-          "legendFormat": "{{status}}",
+          "expr": "sum(rate(http_server_requests_seconds_count{application=\"todoapp\",status=~\"5..\"}[1m])) or vector(0)",
+          "legendFormat": "bad server (5xx)",
           "refId": "A"
+        },
+        {
+          "expr": "sum(rate(http_server_requests_seconds_count{application=\"todoapp\",status=\"429\"}[1m])) or vector(0)",
+          "legendFormat": "429",
+          "refId": "B"
         }
       ],
-      "title": "Bad server (5xx) / s",
+      "title": "HTTP errors (5xx + 429)",
       "type": "timeseries"
     },
     {
@@ -58,17 +74,12 @@
       "id": 3,
       "targets": [
         {
-          "expr": "sum(rate(http_server_requests_seconds_count{application=\"todoapp\",status=\"429\"}[1m]))",
-          "legendFormat": "429/s",
-          "refId": "A"
-        },
-        {
           "expr": "sum(rate(auth_rate_limit_rejected_total[1m])) by (path)",
-          "legendFormat": "rejected {{path}}",
-          "refId": "B"
+          "legendFormat": "{{path}}",
+          "refId": "A"
         }
       ],
-      "title": "Rate limit (429 + auth rejected) / s",
+      "title": "Auth rate limit rejections / s",
       "type": "timeseries"
     },
     {
