@@ -1,3 +1,7 @@
+import {
+  clearSessionAndNotify,
+  getAccessToken,
+} from '@/entities/auth/lib/tokenStorage'
 import { env } from '@/shared/config/env'
 import { ApiError, messageFromErrorBody } from '@/shared/api/errors'
 
@@ -19,14 +23,20 @@ async function parseBody(response: Response): Promise<unknown> {
   return text.length > 0 ? text : undefined
 }
 
+function isAuthPath(path: string): boolean {
+  return path.includes('/v1/auth/')
+}
+
 export async function http<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { body, headers, ...rest } = options
   const url = `${env.apiBaseUrl}${path.startsWith('/') ? path : `/${path}`}`
+  const token = getAccessToken()
 
   const response = await fetch(url, {
     ...rest,
     headers: {
       ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...headers,
     },
     body: body === undefined ? undefined : JSON.stringify(body),
@@ -35,6 +45,10 @@ export async function http<T>(path: string, options: RequestOptions = {}): Promi
   const parsed = await parseBody(response)
 
   if (!response.ok) {
+    if (response.status === 401 && !isAuthPath(path)) {
+      clearSessionAndNotify()
+    }
+
     throw new ApiError(
       messageFromErrorBody(parsed, `Request failed with status ${response.status}`),
       response.status,

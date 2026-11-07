@@ -23,6 +23,11 @@ public class Task {
     @EqualsAndHashCode.Include
     private UUID id;
 
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    @ToString.Exclude
+    private User user;
+
     @Column(name = "title", nullable = false)
     private String title;
 

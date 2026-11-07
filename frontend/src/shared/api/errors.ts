@@ -60,10 +60,10 @@ export function messageFromErrorBody(body: unknown, fallback: string): string {
   }
 
   return (
+    errorBody.error ??
     errorBody.message ??
     errorBody.detail ??
     errorBody.title ??
-    errorBody.error ??
     fallback
   )
 }
