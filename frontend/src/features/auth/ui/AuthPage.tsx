@@ -11,6 +11,7 @@ import { useAuth } from '@/features/auth/model/AuthContext'
 import { toErrorMessage } from '@/shared/api/errors'
 import { Button } from '@/shared/ui/Button'
 import { Input } from '@/shared/ui/Input'
+import { PasswordInput } from '@/shared/ui/PasswordInput'
 
 type AuthMode = 'login' | 'register'
 
@@ -26,14 +27,14 @@ export function AuthPage() {
 
   const registerForm = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { email: '', password: '' },
+    defaultValues: { email: '', password: '', confirmPassword: '' },
   })
 
   const switchMode = (next: AuthMode) => {
     setMode(next)
     setFormError(null)
     loginForm.reset({ email: '', password: '' })
-    registerForm.reset({ email: '', password: '' })
+    registerForm.reset({ email: '', password: '', confirmPassword: '' })
   }
 
   const onLogin = loginForm.handleSubmit(async (values) => {
@@ -48,7 +49,7 @@ export function AuthPage() {
   const onRegister = registerForm.handleSubmit(async (values) => {
     setFormError(null)
     try {
-      await register(values)
+      await register({ email: values.email, password: values.password })
     } catch (error) {
       setFormError(toErrorMessage(error, 'Registration failed'))
     }
@@ -112,9 +113,8 @@ export function AuthPage() {
             >
               Password
             </label>
-            <Input
+            <PasswordInput
               id="login-password"
-              type="password"
               autoComplete="current-password"
               {...loginForm.register('password')}
             />
@@ -164,9 +164,8 @@ export function AuthPage() {
             >
               Password
             </label>
-            <Input
+            <PasswordInput
               id="register-password"
-              type="password"
               autoComplete="new-password"
               {...registerForm.register('password')}
             />
@@ -178,6 +177,25 @@ export function AuthPage() {
             <p className="mt-1 text-xs text-stone-500">
               At least 8 characters with upper, lower, digit and special (@$!%*?&).
             </p>
+          </div>
+
+          <div>
+            <label
+              htmlFor="register-confirm-password"
+              className="mb-1 block text-sm font-medium text-stone-700"
+            >
+              Confirm password
+            </label>
+            <PasswordInput
+              id="register-confirm-password"
+              autoComplete="new-password"
+              {...registerForm.register('confirmPassword')}
+            />
+            {registerForm.formState.errors.confirmPassword ? (
+              <p className="mt-1 text-xs text-red-700">
+                {registerForm.formState.errors.confirmPassword.message}
+              </p>
+            ) : null}
           </div>
 
           {formError ? <p className="text-sm text-red-700">{formError}</p> : null}

@@ -20,10 +20,16 @@ export const loginSchema = z.object({
   password: loginPasswordSchema,
 })
 
-export const registerSchema = z.object({
-  email: emailSchema,
-  password: registerPasswordSchema,
-})
+export const registerSchema = z
+  .object({
+    email: emailSchema,
+    password: registerPasswordSchema,
+    confirmPassword: z.string().min(1, 'Confirm your password'),
+  })
+  .refine((values) => values.password === values.confirmPassword, {
+    message: 'Passwords must match',
+    path: ['confirmPassword'],
+  })
 
 export type LoginFormValues = z.infer<typeof loginSchema>
 export type RegisterFormValues = z.infer<typeof registerSchema>
