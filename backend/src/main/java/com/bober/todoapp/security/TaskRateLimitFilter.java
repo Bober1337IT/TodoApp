@@ -33,7 +33,7 @@ public class TaskRateLimitFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
+    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
         return !(isTaskWrite(request) || isTaskStatusPatch(request));
     }
 
