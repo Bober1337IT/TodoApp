@@ -34,11 +34,7 @@ public class TaskRateLimitFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getRequestURI();
-        String method = request.getMethod();
-        boolean isTaskWrite = path.startsWith("/api/v1/tasks")
-                && (method.equals("POST") || method.equals("PUT") || method.equals("DELETE"));
-        return !isTaskWrite;
+        return !(isTaskWrite(request) || isTaskStatusPatch(request));
     }
 
     @Override
@@ -53,9 +49,20 @@ public class TaskRateLimitFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-        String key = "tasks-write:" + clientId;
 
-        if (!rateLimitingService.isAllowed(key)) {
+        boolean statusPatch = isTaskStatusPatch(request);
+        String key = (statusPatch ? "tasks-status:" : "tasks-write:") + clientId;
+        boolean allowed = statusPatch
+                ? rateLimitingService.isTaskStatusAllowed(key)
+                : rateLimitingService.isTaskWriteAllowed(key);
+
+        if (!allowed) {
+            Counter.builder("tasks.rate_limit.rejected")
+                    .description("Task write/status requests rejected by rate limiting")
+                    .tag("method", request.getMethod())
+                    .tag("scope", statusPatch ? "status" : "write")
+                    .register(meterRegistry)
+                    .increment();
 
             response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
@@ -65,6 +72,20 @@ public class TaskRateLimitFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private static boolean isTaskWrite(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        String method = request.getMethod();
+        return path.startsWith("/api/v1/tasks")
+                && (method.equals("POST") || method.equals("PUT") || method.equals("DELETE"));
+    }
+
+    private static boolean isTaskStatusPatch(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return "PATCH".equals(request.getMethod())
+                && path.startsWith("/api/v1/tasks/")
+                && path.endsWith("/status");
     }
 
     private String resolveClientId() {

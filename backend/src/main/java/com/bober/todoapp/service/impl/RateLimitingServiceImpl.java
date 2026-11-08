@@ -6,6 +6,7 @@ import io.github.bucket4j.Bucket;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 @Service
 public class RateLimitingServiceImpl implements RateLimitingService {
@@ -18,11 +19,25 @@ public class RateLimitingServiceImpl implements RateLimitingService {
 
     @Override
     public Bucket resolveBucket(String key) {
-        return rateLimitCache.computeIfAbsent(key, ignored -> RateLimitConfig.createNewBucket());
+        return resolveBucket(key, RateLimitConfig::createNewBucket);
+    }
+
+    private Bucket resolveBucket(String key, Supplier<Bucket> factory) {
+        return rateLimitCache.computeIfAbsent(key, ignored -> factory.get());
     }
 
     @Override
     public boolean isAllowed(String key) {
         return resolveBucket(key).tryConsume(1);
+    }
+
+    @Override
+    public boolean isTaskWriteAllowed(String key) {
+        return resolveBucket(key, RateLimitConfig::createTaskWriteBucket).tryConsume(1);
+    }
+
+    @Override
+    public boolean isTaskStatusAllowed(String key) {
+        return resolveBucket(key, RateLimitConfig::createTaskStatusBucket).tryConsume(1);
     }
 }

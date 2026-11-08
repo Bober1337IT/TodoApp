@@ -72,14 +72,25 @@
       },
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
       "id": 3,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
       "targets": [
         {
-          "expr": "sum(rate(auth_rate_limit_rejected_total[1m])) by (path)",
-          "legendFormat": "{{path}}",
+          "expr": "sum(rate(tasks_rate_limit_rejected_total[1m])) by (method, scope)",
+          "legendFormat": "{{scope}} {{method}}",
           "refId": "A"
         }
       ],
-      "title": "Auth rate limit rejections / s",
+      "title": "Task rate limit rejections / s",
       "type": "timeseries"
     },
     {

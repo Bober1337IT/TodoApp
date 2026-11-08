@@ -16,6 +16,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+//NOT IN USE MIGRATE TO PROXY
+
 @Component
 public class AuthRateLimitFilter extends OncePerRequestFilter {
 
