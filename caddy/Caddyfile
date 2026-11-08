@@ -1,11 +1,16 @@
+{
+	admin 0.0.0.0:2019
+	metrics
+}
+
 localhost {
 	tls internal
 
-    handle /api/v1/auth/* {
-        rate_limit {
+	handle /api/v1/auth/* {
+		rate_limit {
 			zone auth {
 				key    {remote_host}
-				events 30
+				events 15
 				window 1m
 			}
 		}
