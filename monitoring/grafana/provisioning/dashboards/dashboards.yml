@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: todoapp
+    orgId: 1
+    folder: Todoapp
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    options:
+      path: /var/lib/grafana/dashboards

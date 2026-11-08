@@ -1,6 +1,7 @@
 package com.bober.todoapp.config;
 
 import com.bober.todoapp.security.JwtAuthFilter;
+import com.bober.todoapp.security.TaskRateLimitFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -17,9 +18,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final TaskRateLimitFilter taskRateLimitFilter;
 
-    public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter, TaskRateLimitFilter taskRateLimitFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
+        this.taskRateLimitFilter = taskRateLimitFilter;
     }
 
     @Bean
@@ -34,7 +37,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(taskRateLimitFilter, JwtAuthFilter.class);
 
         return http.build();
     }
