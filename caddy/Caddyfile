@@ -10,7 +10,7 @@ localhost {
 		rate_limit {
 			zone auth {
 				key    {remote_host}
-				events 15
+				events 10
 				window 1m
 			}
 		}
@@ -23,5 +23,15 @@ localhost {
 
 	handle {
 		reverse_proxy frontend:80
+	}
+
+	# rate_limit returns a 429 error → shape JSON like the Spring filters
+	handle_errors {
+		@rateLimited expression `{http.error.status_code} == 429`
+		handle @rateLimited {
+			header Content-Type application/json
+			header Retry-After 60
+			respond `{"error":"Too many requests. Try again later."}` 429
+		}
 	}
 }
