@@ -1,5 +1,6 @@
 package com.bober.todo.feature.auth.data
 
+import com.bober.todo.feature.auth.data.local.TokenStore
 import com.bober.todo.feature.auth.data.remote.AuthApi
 import com.bober.todo.feature.auth.data.remote.dto.AuthResponseDto
 import com.bober.todo.feature.auth.data.remote.dto.ErrorDto
@@ -13,18 +14,31 @@ import retrofit2.HttpException
 class AuthRepositoryImpl @Inject constructor(
     private val authApi: AuthApi,
     private val gson: Gson,
+    private val tokenStore: TokenStore,
 ) : AuthRepository {
 
     override suspend fun login(email: String, password: String): Result<AuthResponseDto> {
-        return runAuthCall {
+        val result = runAuthCall {
             authApi.login(LoginRequestDto(email = email, password = password))
         }
+        result.getOrNull()?.let { saveSession(it) }
+        return result
     }
 
     override suspend fun register(email: String, password: String): Result<AuthResponseDto> {
-        return runAuthCall {
+        val result = runAuthCall {
             authApi.register(RegisterRequestDto(email = email, password = password))
         }
+        result.getOrNull()?.let { saveSession(it) }
+        return result
+    }
+
+    private suspend fun saveSession(dto: AuthResponseDto) {
+        tokenStore.saveSession(
+            accessToken = dto.accessToken,
+            tokenType = dto.tokenType,
+            email = dto.email,
+        )
     }
 
     private suspend fun runAuthCall(

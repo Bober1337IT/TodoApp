@@ -1,6 +1,7 @@
 package com.bober.todo.core.network.di
 
 import com.bober.todo.BuildConfig
+import com.bober.todo.core.network.AuthInterceptor
 import com.bober.todo.feature.auth.data.remote.AuthApi
 import com.google.gson.Gson
 import dagger.Module
@@ -23,8 +24,11 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideOkHttpClient(
+        authInterceptor: AuthInterceptor,
+    ): OkHttpClient {
         val builder = OkHttpClient.Builder()
+            .addInterceptor(authInterceptor)
         if (BuildConfig.DEBUG) {
             val logging = HttpLoggingInterceptor().apply {
                 level = HttpLoggingInterceptor.Level.BODY
