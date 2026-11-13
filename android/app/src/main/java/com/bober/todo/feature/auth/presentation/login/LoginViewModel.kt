@@ -47,7 +47,6 @@ class LoginViewModel @Inject constructor(
                         password = state.password,
                     ).onSuccess {
                         _uiState.update { it.copy(isLoading = false, isSuccess = true) }
-                        // TODO: navigate to app
                     }.onFailure { error ->
                         _uiState.update {
                             it.copy(

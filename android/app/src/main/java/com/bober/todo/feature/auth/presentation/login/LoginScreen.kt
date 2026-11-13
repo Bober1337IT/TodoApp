@@ -17,6 +17,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -34,7 +35,8 @@ import com.bober.todo.ui.theme.TodoappTheme
 fun LoginScreen(
     modifier: Modifier = Modifier,
     onNavigateToRegister: () -> Unit = {},
-    viewModel: LoginViewModel = hiltViewModel()
+    onNavigateToTask: () -> Unit = {},
+    viewModel: LoginViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
 
@@ -47,6 +49,12 @@ fun LoginScreen(
         onNavigateToRegister = onNavigateToRegister,
         modifier = modifier,
     )
+
+    LaunchedEffect(state.isSuccess) {
+        if (state.isSuccess) {
+            onNavigateToTask()
+        }
+    }
 }
 
 @Composable

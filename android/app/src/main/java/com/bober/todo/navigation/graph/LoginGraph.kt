@@ -14,6 +14,14 @@ fun NavGraphBuilder.loginNavGraph(
             onNavigateToRegister = {
                 navController.navigate(Screen.RegisterScreen.route)
             },
+            onNavigateToTask = {
+                navController.navigate(Screen.TaskScreen.route) {
+                    popUpTo(Screen.LoginScreen.route) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
+                }
+            }
         )
     }
 }

@@ -19,6 +19,14 @@ fun NavGraphBuilder.registerNavGraph(
                     launchSingleTop = true
                 }
             },
+            onNavigateToTask = {
+                navController.navigate(Screen.TaskScreen.route) {
+                    popUpTo(Screen.LoginScreen.route) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
+                }
+            }
         )
     }
 }
