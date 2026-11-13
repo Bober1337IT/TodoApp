@@ -1,24 +1,21 @@
 package com.bober.todo.feature.auth.data
 
+import com.bober.todo.core.network.SafeApiCall
 import com.bober.todo.feature.auth.data.local.TokenStore
 import com.bober.todo.feature.auth.data.remote.AuthApi
 import com.bober.todo.feature.auth.data.remote.dto.AuthResponseDto
-import com.bober.todo.feature.auth.data.remote.dto.ErrorDto
 import com.bober.todo.feature.auth.data.remote.dto.LoginRequestDto
 import com.bober.todo.feature.auth.data.remote.dto.RegisterRequestDto
-import com.google.gson.Gson
-import java.io.IOException
 import javax.inject.Inject
-import retrofit2.HttpException
 
 class AuthRepositoryImpl @Inject constructor(
     private val authApi: AuthApi,
-    private val gson: Gson,
     private val tokenStore: TokenStore,
+    private val safeApiCall: SafeApiCall,
 ) : AuthRepository {
 
     override suspend fun login(email: String, password: String): Result<AuthResponseDto> {
-        val result = runAuthCall {
+        val result = safeApiCall.run(statusMessages = authStatusMessages) {
             authApi.login(LoginRequestDto(email = email, password = password))
         }
         result.getOrNull()?.let { saveSession(it) }
@@ -26,7 +23,7 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
     override suspend fun register(email: String, password: String): Result<AuthResponseDto> {
-        val result = runAuthCall {
+        val result = safeApiCall.run(statusMessages = authStatusMessages) {
             authApi.register(RegisterRequestDto(email = email, password = password))
         }
         result.getOrNull()?.let { saveSession(it) }
@@ -41,36 +38,10 @@ class AuthRepositoryImpl @Inject constructor(
         )
     }
 
-    private suspend fun runAuthCall(
-        block: suspend () -> AuthResponseDto,
-    ): Result<AuthResponseDto> {
-        return try {
-            Result.success(block())
-        } catch (e: HttpException) {
-            Result.failure(Exception(httpErrorMessage(e)))
-        } catch (e: IOException) {
-            Result.failure(Exception("Cannot reach server. Check your connection."))
-        } catch (e: Exception) {
-            Result.failure(Exception(e.message ?: "Something went wrong"))
-        }
-    }
-
-    private fun httpErrorMessage(exception: HttpException): String {
-        val body = exception.response()?.errorBody()?.string()
-        if (!body.isNullOrBlank()) {
-            val fromApi = runCatching {
-                gson.fromJson(body, ErrorDto::class.java).error
-            }.getOrNull()
-            if (!fromApi.isNullOrBlank()) {
-                return fromApi
-            }
-        }
-
-        return when (exception.code()) {
-            401 -> "Invalid email or password"
-            409 -> "Email already registered"
-            in 500..599 -> "Server error. Try again later."
-            else -> "Request failed (${exception.code()})"
-        }
+    private companion object {
+        val authStatusMessages = mapOf(
+            401 to "Invalid email or password",
+            409 to "Email already registered",
+        )
     }
 }
