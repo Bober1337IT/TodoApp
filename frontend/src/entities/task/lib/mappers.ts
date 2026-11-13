@@ -57,13 +57,16 @@ export function mapFormValuesToCreateInput(values: CreateTaskFormValues): Create
   }
 }
 
-export function mapFormValuesToUpdateInput(values: UpdateTaskFormValues): UpdateTaskInput {
+export function mapFormValuesToUpdateInput(
+  values: UpdateTaskFormValues,
+  status: TaskStatus,
+): UpdateTaskInput {
   return {
     title: values.title.trim(),
     description: values.description?.trim() ? values.description.trim() : null,
     dueDate: values.dueDate ? values.dueDate : null,
     priority: values.priority,
-    status: values.status,
+    status,
   }
 }
 
@@ -73,6 +76,5 @@ export function mapTaskToUpdateFormValues(task: Task): UpdateTaskFormValues {
     description: task.description ?? '',
     dueDate: task.dueDate ?? '',
     priority: task.priority,
-    status: task.status,
   }
 }

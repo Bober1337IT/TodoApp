@@ -54,8 +54,8 @@ export function TaskItem({ task, isEditing, onEdit }: TaskItemProps) {
                 >
                   {task.title}
                 </h3>
-                <span className="text-xs uppercase tracking-wide text-stone-500">
-                  {task.priority} · {task.status}
+                <span className="text-xs font-bold uppercase tracking-wide text-stone-800">
+                  {task.priority}
                 </span>
               </div>
               {task.description ? (

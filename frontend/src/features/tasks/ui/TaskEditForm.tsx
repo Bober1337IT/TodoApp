@@ -6,7 +6,7 @@ import {
 } from '@/entities/task/lib/mappers'
 import { updateTaskSchema, type UpdateTaskFormValues } from '@/entities/task/lib/schemas'
 import type { Task } from '@/entities/task/model/types'
-import { TASK_PRIORITIES, TASK_STATUSES } from '@/entities/task/model/types'
+import { TASK_PRIORITIES } from '@/entities/task/model/types'
 import { useUpdateTaskMutation } from '@/features/tasks/api/useUpdateTaskMutation'
 import { toErrorMessage } from '@/shared/api/errors'
 import { Button } from '@/shared/ui/Button'
@@ -35,7 +35,7 @@ export function TaskEditForm({ task, onCancel, onSaved }: TaskEditFormProps) {
     try {
       await updateTaskMutation.mutateAsync({
         id: task.id,
-        input: mapFormValuesToUpdateInput(values),
+        input: mapFormValuesToUpdateInput(values, task.status),
       })
       onSaved()
     } catch {
@@ -66,7 +66,7 @@ export function TaskEditForm({ task, onCancel, onSaved }: TaskEditFormProps) {
         ) : null}
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2">
         <div>
           <label
             htmlFor={`edit-dueDate-${task.id}`}
@@ -96,25 +96,6 @@ export function TaskEditForm({ task, onCancel, onSaved }: TaskEditFormProps) {
           </Select>
           {errors.priority ? (
             <p className="mt-1 text-xs text-red-700">{errors.priority.message}</p>
-          ) : null}
-        </div>
-
-        <div>
-          <label
-            htmlFor={`edit-status-${task.id}`}
-            className="mb-1 block text-sm font-medium text-stone-700"
-          >
-            Status
-          </label>
-          <Select id={`edit-status-${task.id}`} {...register('status')}>
-            {TASK_STATUSES.map((status) => (
-              <option key={status} value={status}>
-                {status}
-              </option>
-            ))}
-          </Select>
-          {errors.status ? (
-            <p className="mt-1 text-xs text-red-700">{errors.status.message}</p>
           ) : null}
         </div>
       </div>

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { TASK_PRIORITIES, TASK_STATUSES } from '@/entities/task/model/types'
+import { TASK_PRIORITIES } from '@/entities/task/model/types'
 
 const titleSchema = z
   .string()
@@ -31,7 +31,6 @@ export const updateTaskSchema = z.object({
   description: descriptionSchema,
   dueDate: dueDateSchema,
   priority: z.enum(TASK_PRIORITIES),
-  status: z.enum(TASK_STATUSES),
 })
 
 export type CreateTaskFormValues = z.infer<typeof createTaskSchema>
