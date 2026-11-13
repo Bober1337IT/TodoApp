@@ -12,6 +12,9 @@ services:
 
   backend:
     build: ./backend
+    ports:
+      # Host publish for Android emulator 10.0.2.2:8080, Caddy still fronts browsers on :443
+      - "8080:8080"
     expose:
       - "8080"
     environment:
