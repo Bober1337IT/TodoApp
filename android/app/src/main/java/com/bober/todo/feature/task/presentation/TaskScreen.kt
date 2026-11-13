@@ -18,11 +18,15 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -32,20 +36,38 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.bober.todo.feature.task.data.remote.dto.TaskDto
 import com.bober.todo.ui.theme.TodoappTheme
 
 @Composable
 fun TaskScreen(
+    onAddTask: () -> Unit,
+    onEditTask: (taskId: String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: TaskViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.loadTasksOnResume()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     TaskScreenContent(
         state = state,
-        onRefresh = viewModel::loadTasks,
+        onRefresh = { viewModel.loadTasks(clearWhileLoading = false) },
         onToggleStatus = viewModel::onToggleStatus,
+        onAddTask = onAddTask,
+        onEditTask = onEditTask,
         modifier = modifier,
     )
 }
@@ -56,91 +78,104 @@ fun TaskScreenContent(
     state: TaskUiState,
     onRefresh: () -> Unit,
     onToggleStatus: (TaskDto) -> Unit,
+    onAddTask: () -> Unit,
+    onEditTask: (taskId: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp, vertical = 24.dp),
-    ) {
-        Text(
-            text = "All tasks",
-            style = MaterialTheme.typography.headlineMedium,
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (state.errorMessage != null && state.tasks.isNotEmpty()) {
-            Text(
-                text = state.errorMessage,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall,
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-
-        PullToRefreshBox(
-            isRefreshing = state.isLoading,
-            onRefresh = onRefresh,
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        floatingActionButton = {
+            FloatingActionButton(onClick = onAddTask) {
+                Text("+")
+            }
+        },
+    ) { innerPadding ->
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(horizontal = 16.dp, vertical = 24.dp),
         ) {
-            when {
-                state.isLoading && state.tasks.isEmpty() && state.errorMessage == null -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                }
+            Text(
+                text = "All tasks",
+                style = MaterialTheme.typography.headlineMedium,
+            )
+            Spacer(modifier = Modifier.height(16.dp))
 
-                state.errorMessage != null && state.tasks.isEmpty() -> {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        Text(
-                            text = state.errorMessage,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Button(onClick = onRefresh) {
-                            Text("Retry")
+            if (state.errorMessage != null && state.tasks.isNotEmpty()) {
+                Text(
+                    text = state.errorMessage,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            PullToRefreshBox(
+                isRefreshing = state.isLoading && state.tasks.isNotEmpty(),
+                onRefresh = onRefresh,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+            ) {
+                when {
+                    state.isLoading && state.tasks.isEmpty() -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            CircularProgressIndicator()
                         }
                     }
-                }
 
-                state.tasks.isEmpty() -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            text = "No tasks yet",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
-
-                else -> {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(bottom = 24.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        items(
-                            items = state.tasks,
-                            key = { it.id },
-                        ) { task ->
-                            TaskRow(
-                                task = task,
-                                isUpdating = state.updatingTaskId == task.id,
-                                onToggleStatus = { onToggleStatus(task) },
+                    state.errorMessage != null && state.tasks.isEmpty() -> {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Text(
+                                text = state.errorMessage,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodyMedium,
                             )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Button(onClick = onRefresh) {
+                                Text("Retry")
+                            }
+                        }
+                    }
+
+                    state.tasks.isEmpty() -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                text = "No tasks yet. Tap + to create one.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+
+                    else -> {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(bottom = 88.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            items(
+                                items = state.tasks,
+                                key = { it.id },
+                            ) { task ->
+                                TaskRow(
+                                    task = task,
+                                    isUpdating = state.updatingTaskId == task.id,
+                                    onToggleStatus = { onToggleStatus(task) },
+                                    onEdit = { onEditTask(task.id) },
+                                )
+                            }
                         }
                     }
                 }
@@ -154,6 +189,7 @@ private fun TaskRow(
     task: TaskDto,
     isUpdating: Boolean,
     onToggleStatus: () -> Unit,
+    onEdit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val isComplete = task.status == "COMPLETE"
@@ -199,24 +235,10 @@ private fun TaskRow(
             Spacer(modifier = Modifier.width(4.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top,
-                ) {
-                    Text(
-                        text = task.title,
-                        style = titleStyle,
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(end = 8.dp),
-                    )
-                    Text(
-                        text = "${task.priority} · ${task.status}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+                Text(
+                    text = task.title,
+                    style = titleStyle,
+                )
 
                 if (!task.description.isNullOrBlank()) {
                     Spacer(modifier = Modifier.height(4.dp))
@@ -236,6 +258,23 @@ private fun TaskRow(
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    text = task.priority,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                TextButton(
+                    onClick = onEdit,
+                    enabled = !isUpdating,
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                ) {
+                    Text("Edit")
+                }
+            }
         }
     }
 }
@@ -246,6 +285,7 @@ private fun TaskPreviewList() {
     TodoappTheme {
         TaskScreenContent(
             state = TaskUiState(
+                isLoading = false,
                 tasks = listOf(
                     TaskDto(
                         id = "1",
@@ -265,6 +305,8 @@ private fun TaskPreviewList() {
             ),
             onRefresh = {},
             onToggleStatus = {},
+            onAddTask = {},
+            onEditTask = {},
         )
     }
 }
@@ -274,9 +316,11 @@ private fun TaskPreviewList() {
 private fun TaskPreviewEmpty() {
     TodoappTheme {
         TaskScreenContent(
-            state = TaskUiState(),
+            state = TaskUiState(isLoading = false),
             onRefresh = {},
             onToggleStatus = {},
+            onAddTask = {},
+            onEditTask = {},
         )
     }
 }

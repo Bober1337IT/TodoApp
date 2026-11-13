@@ -20,12 +20,31 @@ class TaskViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(TaskUiState())
     val uiState: StateFlow<TaskUiState> = _uiState.asStateFlow()
 
-    init {
-        loadTasks()
+    private var skipNextResumeLoad = false
+
+    fun loadTasksOnResume() {
+        if (skipNextResumeLoad) {
+            skipNextResumeLoad = false
+            return
+        }
+        loadTasks(clearWhileLoading = true)
     }
 
-    fun loadTasks() {
-        _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+    fun replaceTasks(tasks: List<TaskDto>) {
+        skipNextResumeLoad = true
+        _uiState.update {
+            it.copy(tasks = tasks, isLoading = false, errorMessage = null)
+        }
+    }
+
+    fun loadTasks(clearWhileLoading: Boolean = true) {
+        _uiState.update {
+            it.copy(
+                isLoading = true,
+                errorMessage = null,
+                tasks = if (clearWhileLoading) emptyList() else it.tasks,
+            )
+        }
         viewModelScope.launch {
             taskRepository.listTasks()
                 .onSuccess { tasks ->
