@@ -22,6 +22,10 @@ class TokenStore @Inject constructor(
         prefs[KEY_ACCESS_TOKEN]
     }
 
+    val email: Flow<String?> = dataStore.data.map { prefs ->
+        prefs[KEY_EMAIL]
+    }
+
     fun getAccessToken(): String? = cachedAccessToken.get()
 
     suspend fun hydrate() {

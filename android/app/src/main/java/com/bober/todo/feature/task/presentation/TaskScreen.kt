@@ -39,9 +39,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -112,6 +116,24 @@ fun TaskScreenContent(
                 text = "All tasks",
                 style = MaterialTheme.typography.headlineMedium,
             )
+            if (!state.userEmail.isNullOrBlank()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = buildAnnotatedString {
+                        append("Signed in as ")
+                        withStyle(
+                            SpanStyle(
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            ),
+                        ) {
+                            append(state.userEmail)
+                        }
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
             Spacer(modifier = Modifier.height(16.dp))
 
             if (state.errorMessage != null && state.tasks.isNotEmpty()) {
@@ -357,6 +379,7 @@ private fun TaskPreviewList() {
         TaskScreenContent(
             state = TaskUiState(
                 isLoading = false,
+                userEmail = "you@example.com",
                 tasks = listOf(
                     TaskDto(
                         id = "1",

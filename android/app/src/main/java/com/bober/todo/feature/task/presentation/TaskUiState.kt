@@ -7,5 +7,6 @@ data class TaskUiState(
     val isLoading: Boolean = true,
     val updatingTaskId: String? = null,
     val pendingDeleteTaskId: String? = null,
+    val userEmail: String? = null,
     val errorMessage: String? = null,
 )

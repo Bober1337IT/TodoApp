@@ -2,6 +2,7 @@ package com.bober.todo.feature.task.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.bober.todo.feature.auth.data.local.TokenStore
 import com.bober.todo.feature.task.data.TaskRepository
 import com.bober.todo.feature.task.data.remote.dto.TaskDto
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,6 +18,7 @@ import javax.inject.Inject
 @HiltViewModel
 class TaskViewModel @Inject constructor(
     private val taskRepository: TaskRepository,
+    private val tokenStore: TokenStore,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TaskUiState())
@@ -24,6 +26,14 @@ class TaskViewModel @Inject constructor(
 
     private var skipNextResumeLoad = false
     private var pendingDeleteResetJob: Job? = null
+
+    init {
+        viewModelScope.launch {
+            tokenStore.email.collect { email ->
+                _uiState.update { it.copy(userEmail = email) }
+            }
+        }
+    }
 
     fun loadTasksOnResume() {
         if (skipNextResumeLoad) {
