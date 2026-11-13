@@ -1,16 +1,17 @@
 # Todoapp
 
-Spring Boot API (JWT + tasks) with a Docker stack: Caddy (TLS + auth rate limit), Postgres, Prometheus, Grafana.
+Spring Boot API (JWT + tasks) with a Docker stack: Caddy (TLS + auth rate limit), Postgres, Prometheus, Grafana, plus a React web UI and an Android client.
 
-The frontend is only an HTTP client — this document focuses on **backend and DevOps**.
+Clients are HTTP-only — they talk to the same JWT task API. Sections below cover **backend / DevOps** and **Android**.
 
 ## Architecture
 
 ```text
-Client (browser / curl)
-        │  https://localhost
+Client (browser / Android / curl)
+        │  https://localhost  (web via Caddy)
+        │  http://10.0.2.2:8080 or LAN:8080  (Android → backend, see below)
         ▼
-     Caddy :443
+     Caddy :443          (web entry)
         │  TLS (tls internal for local use)
         ├─ /api/v1/auth/*  → IP rate limit → backend:8080
         ├─ /api/*          → backend:8080
@@ -63,7 +64,7 @@ docker compose up -d --build
 | http://localhost:3000 | Grafana |
 | http://localhost:9090 | Prometheus |
 
-Backend and frontend are **not** published on the host — entry point is Caddy.
+Web entry point is Caddy (80/443). Backend is also published on host **8080** so Android (emulator/LAN) can call the API without TLS. Frontend container is not meant for direct host use.
 
 ## Metrics and dashboard
 
@@ -71,20 +72,74 @@ Backend and frontend are **not** published on the host — entry point is Caddy.
 - Caddy auth rejects: `caddy_http_request_errors_total` (rate_limit middleware; do not confuse with task `429`s proxied through Caddy)
 - Dashboard: Grafana → **Todoapp overview** (HTTP, limits, JVM)
 
+## Android
+
+Kotlin + Jetpack Compose client under `android/`. Same API as the web app (auth, tasks CRUD, status toggle).
+
+### Stack
+
+| Piece | Role |
+|-------|------|
+| Compose + Navigation | UI and screen graph (splash → login/register → tasks → add/edit) |
+| Hilt | DI (`@HiltAndroidApp`, `@AndroidEntryPoint`, `hiltViewModel`) |
+| Retrofit + OkHttp + Gson | HTTP client; `BuildConfig.BASE_URL` |
+| DataStore | JWT + email (`TokenStore`) |
+| Auth interceptor | Adds `Authorization: Bearer …` |
+
+### Features (parity notes)
+
+- Splash session check (`GET /tasks` with stored token)
+- Login / register, signed-in email on task list, sign out
+- Task list: pull-to-refresh, checkbox status, two-tap delete (3s confirm), add/edit forms with date picker
+- Status is changed via checkbox only 
+
+### Run
+
+1. Start backend (at least API reachable on the host), e.g. `docker compose up -d` (backend is published on `8080` when configured that way for device/emulator use).
+2. Point the app at the API via `android/local.properties` → `api.base.url` (Gradle → `BuildConfig.BASE_URL`).
+
+```bash
+# Emulator → host machine backend (default if unset)
+./scripts/dev-lan.sh --emulator
+
+# Physical phone on same Wi‑Fi → LAN IP of your PC
+./scripts/dev-lan.sh
+
+# Optional: also bring compose up
+./scripts/dev-lan.sh --up
+```
+
+| Target | Typical `api.base.url` |
+|--------|-------------------------|
+| Emulator | `http://10.0.2.2:8080/` |
+| Phone (LAN) | `http://<your-lan-ip>:8080/` |
+
+Open `android/` in Android Studio, sync Gradle, run the `app` configuration.
+
+`android/local.properties` is local (sdk path + API URL)
+
+### Key paths
+
+| Path | Description |
+|------|-------------|
+| `android/app/` | Application module |
+| `android/.../core/network/` | OkHttp interceptors, `SafeApiCall` |
+| `android/.../feature/auth/` | Login/register + `TokenStore` |
+| `android/.../feature/task/` | List, form, repository, API DTOs |
+| `android/.../navigation/` | `TodoNavHost` + graphs |
+| `scripts/dev-lan.sh` | Writes `api.base.url` for emulator or phone |
+
 ## Key files
 
 | Path | Description |
 |------|-------------|
 | `backend/` | Spring Boot code |
+| `frontend/` | React web UI |
+| `android/` | Android Compose client |
 | `caddy/Caddyfile` | TLS, routing, auth rate limit |
 | `caddy/Dockerfile` | Caddy + `caddy-ratelimit` plugin |
 | `docker-compose.yml` | All services |
 | `monitoring/prometheus/prometheus.yml` | Scrapes backend + Caddy |
 | `monitoring/grafana/dashboards/` | Dashboard provisioning |
+| `scripts/dev-lan.sh` | Android API base URL for LAN / emulator |
 | `.env` | Secrets |
-
-## Production (short)
-
-- In the Caddyfile: real domain instead of `localhost`, drop `tls internal` → Let’s Encrypt
-- Open 80/443; do not expose 5432/9090/3000 publicly
-- In-memory Bucket4j does not scale across multiple backend replicas (use Redis / edge limits instead)
