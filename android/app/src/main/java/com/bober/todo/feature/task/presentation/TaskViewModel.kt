@@ -3,6 +3,7 @@ package com.bober.todo.feature.task.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bober.todo.feature.task.data.TaskRepository
+import com.bober.todo.feature.task.data.remote.dto.TaskDto
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -41,5 +42,44 @@ class TaskViewModel @Inject constructor(
                     }
                 }
         }
+    }
+
+    fun onToggleStatus(task: TaskDto) {
+        if (_uiState.value.updatingTaskId != null) return
+
+        val newStatus = if (task.status == STATUS_COMPLETE) {
+            STATUS_OPEN
+        } else {
+            STATUS_COMPLETE
+        }
+
+        _uiState.update { it.copy(updatingTaskId = task.id, errorMessage = null) }
+        viewModelScope.launch {
+            taskRepository.updateTaskStatus(id = task.id, status = newStatus)
+                .onSuccess { updated ->
+                    _uiState.update { state ->
+                        state.copy(
+                            tasks = state.tasks.map { current ->
+                                if (current.id == updated.id) updated else current
+                            },
+                            updatingTaskId = null,
+                            errorMessage = null,
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    _uiState.update {
+                        it.copy(
+                            updatingTaskId = null,
+                            errorMessage = error.message ?: "Something went wrong",
+                        )
+                    }
+                }
+        }
+    }
+
+    private companion object {
+        const val STATUS_OPEN = "OPEN"
+        const val STATUS_COMPLETE = "COMPLETE"
     }
 }
