@@ -19,9 +19,6 @@ fun NavGraphBuilder.registerNavGraph(
                     launchSingleTop = true
                 }
             },
-            onRegister = { _, _ ->
-                //
-            },
         )
     }
 }

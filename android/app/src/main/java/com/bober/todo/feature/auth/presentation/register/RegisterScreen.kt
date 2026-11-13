@@ -17,10 +17,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
@@ -29,38 +27,25 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.bober.todo.ui.theme.TodoappTheme
 
 @Composable
 fun RegisterScreen(
     modifier: Modifier = Modifier,
-    onRegister: (email: String, password: String) -> Unit = { _, _ -> },
     onNavigateToLogin: () -> Unit = {},
+    viewModel: RegisterViewModel = hiltViewModel(),
 ) {
-    var state by remember { mutableStateOf(RegisterUiState()) }
+    val state by viewModel.uiState.collectAsState()
 
     RegisterScreenContent(
         state = state,
-        onEmailChange = { state = state.copy(email = it, errorMessage = null) },
-        onPasswordChange = { state = state.copy(password = it, errorMessage = null) },
-        onConfirmPasswordChange = { state = state.copy(confirmPassword = it, errorMessage = null) },
-        onTogglePasswordVisible = {
-            state = state.copy(isPasswordVisible = !state.isPasswordVisible)
-        },
-        onToggleConfirmPasswordVisible = {
-            state = state.copy(isConfirmPasswordVisible = !state.isConfirmPasswordVisible)
-        },
-        onSubmit = {
-            when {
-                state.email.isBlank() || state.password.isBlank() -> {
-                    state = state.copy(errorMessage = "Email and password are required")
-                }
-                state.password != state.confirmPassword -> {
-                    state = state.copy(errorMessage = "Passwords do not match")
-                }
-                else -> onRegister(state.email.trim(), state.password)
-            }
-        },
+        onEmailChange = viewModel::onEmailChange,
+        onPasswordChange = viewModel::onPasswordChange,
+        onConfirmPasswordChange = viewModel::onConfirmPasswordChange,
+        onTogglePasswordVisible = viewModel::onTogglePasswordVisible,
+        onToggleConfirmPasswordVisible = viewModel::onToggleConfirmPasswordVisible,
+        onSubmit = viewModel::onSubmit,
         onNavigateToLogin = onNavigateToLogin,
         modifier = modifier,
     )
