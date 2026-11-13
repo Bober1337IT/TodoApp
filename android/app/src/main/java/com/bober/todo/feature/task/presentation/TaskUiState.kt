@@ -6,5 +6,6 @@ data class TaskUiState(
     val tasks: List<TaskDto> = emptyList(),
     val isLoading: Boolean = true,
     val updatingTaskId: String? = null,
+    val pendingDeleteTaskId: String? = null,
     val errorMessage: String? = null,
 )
