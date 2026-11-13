@@ -27,12 +27,14 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -59,6 +61,7 @@ import com.bober.todo.ui.theme.TodoappTheme
 fun TaskScreen(
     onAddTask: () -> Unit,
     onEditTask: (taskId: String) -> Unit,
+    onLogout: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: TaskViewModel = hiltViewModel(),
 ) {
@@ -75,6 +78,12 @@ fun TaskScreen(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
+    LaunchedEffect(state.isLoggedOut) {
+        if (state.isLoggedOut) {
+            onLogout()
+        }
+    }
+
     TaskScreenContent(
         state = state,
         onRefresh = { viewModel.loadTasks(clearWhileLoading = false) },
@@ -82,6 +91,7 @@ fun TaskScreen(
         onDeleteTask = viewModel::onDeleteClick,
         onAddTask = onAddTask,
         onEditTask = onEditTask,
+        onLogout = viewModel::onLogout,
         modifier = modifier,
     )
 }
@@ -95,6 +105,7 @@ fun TaskScreenContent(
     onDeleteTask: (taskId: String) -> Unit,
     onAddTask: () -> Unit,
     onEditTask: (taskId: String) -> Unit,
+    onLogout: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -112,27 +123,38 @@ fun TaskScreenContent(
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp, vertical = 24.dp),
         ) {
-            Text(
-                text = "All tasks",
-                style = MaterialTheme.typography.headlineMedium,
-            )
-            if (!state.userEmail.isNullOrBlank()) {
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = buildAnnotatedString {
-                        append("Signed in as ")
-                        withStyle(
-                            SpanStyle(
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.onSurface,
-                            ),
-                        ) {
-                            append(state.userEmail)
-                        }
-                    },
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "All tasks",
+                        style = MaterialTheme.typography.headlineMedium,
+                    )
+                    if (!state.userEmail.isNullOrBlank()) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = buildAnnotatedString {
+                                append("Signed in as ")
+                                withStyle(
+                                    SpanStyle(
+                                        fontWeight = FontWeight.Medium,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                    ),
+                                ) {
+                                    append(state.userEmail)
+                                }
+                            },
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                OutlinedButton(onClick = onLogout) {
+                    Text("Sign out")
+                }
             }
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -402,6 +424,7 @@ private fun TaskPreviewList() {
             onDeleteTask = {},
             onAddTask = {},
             onEditTask = {},
+            onLogout = {},
         )
     }
 }
@@ -417,6 +440,7 @@ private fun TaskPreviewEmpty() {
             onDeleteTask = {},
             onAddTask = {},
             onEditTask = {},
+            onLogout = {},
         )
     }
 }

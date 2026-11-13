@@ -8,5 +8,6 @@ data class TaskUiState(
     val updatingTaskId: String? = null,
     val pendingDeleteTaskId: String? = null,
     val userEmail: String? = null,
+    val isLoggedOut: Boolean = false,
     val errorMessage: String? = null,
 )

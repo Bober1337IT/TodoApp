@@ -24,6 +24,12 @@ fun NavGraphBuilder.taskNavGraph(
             onEditTask = { taskId ->
                 navController.navigate(Screen.TaskEditScreen.createRoute(taskId))
             },
+            onLogout = {
+                navController.navigate(Screen.LoginScreen.route) {
+                    popUpTo(Screen.TaskScreen.route) { inclusive = true }
+                    launchSingleTop = true
+                }
+            },
         )
     }
 

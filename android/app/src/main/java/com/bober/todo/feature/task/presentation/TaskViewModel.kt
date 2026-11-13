@@ -35,6 +35,14 @@ class TaskViewModel @Inject constructor(
         }
     }
 
+    fun onLogout() {
+        viewModelScope.launch {
+            clearPendingDelete()
+            tokenStore.clear()
+            _uiState.update { it.copy(isLoggedOut = true, userEmail = null) }
+        }
+    }
+
     fun loadTasksOnResume() {
         if (skipNextResumeLoad) {
             skipNextResumeLoad = false
