@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.bober.todo.navigation.graph.loginNavGraph
 import com.bober.todo.navigation.graph.registerNavGraph
+import com.bober.todo.navigation.graph.splashNavGraph
 import com.bober.todo.navigation.graph.taskNavGraph
 
 @Composable
@@ -16,9 +17,10 @@ fun TodoNavHost(
 
     NavHost(
         navController = navController,
-        startDestination = Screen.LoginScreen.route,
+        startDestination = Screen.SplashScreen.route,
         modifier = modifier,
     ) {
+        splashNavGraph(navController)
         loginNavGraph(navController)
         registerNavGraph(navController)
         taskNavGraph(navController)

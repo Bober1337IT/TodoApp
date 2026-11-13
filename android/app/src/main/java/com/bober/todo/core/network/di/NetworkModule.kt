@@ -3,6 +3,7 @@ package com.bober.todo.core.network.di
 import com.bober.todo.BuildConfig
 import com.bober.todo.core.network.AuthInterceptor
 import com.bober.todo.feature.auth.data.remote.AuthApi
+import com.bober.todo.feature.task.data.remote.TasksApi
 import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
@@ -55,5 +56,11 @@ object NetworkModule {
     @Singleton
     fun provideAuthApi(retrofit: Retrofit): AuthApi {
         return retrofit.create(AuthApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideTasksApi(retrofit: Retrofit): TasksApi {
+        return retrofit.create(TasksApi::class.java)
     }
 }
