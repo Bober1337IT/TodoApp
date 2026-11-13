@@ -14,9 +14,6 @@ fun NavGraphBuilder.loginNavGraph(
             onNavigateToRegister = {
                 navController.navigate(Screen.RegisterScreen.route)
             },
-            onLogin = { _, _ ->
-                // TODO
-            },
         )
     }
 }
